@@ -105,7 +105,13 @@ class EDM_Settings {
 
         // Only accept keys that match known global colors (defensive)
         $known_colors = $this->color_manager->get_global_colors();
-        $allowed_keys = array_keys( $known_colors );
+        $allowed_keys = array();
+
+        foreach ( $known_colors as $item ) {
+            if ( is_array( $item ) && ! empty( $item['_id'] ) ) {
+                $allowed_keys[] = sanitize_text_field( $item['_id'] );
+            }
+        }
 
         foreach ( $input as $key => $val ) {
             $key = sanitize_text_field( $key );
@@ -133,7 +139,7 @@ class EDM_Settings {
         ?>
         <div class="wrap">
             <h1><?php esc_html_e( 'Dark Mode Colors', 'elementor-dark-mapper' ); ?></h1>
-            <p><?php esc_html_e( 'Define Night Mode replacement colors for Elementor Global Colors (Elementor Kit system_colors). This plugin overrides CSS variables at runtime — widgets are not modified.', 'elementor-dark-mapper' ); ?></p>
+            <p><?php esc_html_e( 'Define Night Mode replacement colors for Elementor Global Colors (Elementor Kit system_colors + custom_colors). This plugin overrides CSS variables at runtime — widgets are not modified.', 'elementor-dark-mapper' ); ?></p>
 
             <form method="post" action="options.php">
                 <?php settings_fields( 'edm_settings_group' ); ?>
@@ -155,14 +161,20 @@ class EDM_Settings {
                             </td>
                         </tr>
                     <?php else : ?>
-                        <?php foreach ( $global_colors as $id => $meta ) :
+                        <?php foreach ( $global_colors as $meta ) :
+                            $id          = ! empty( $meta['_id'] ) ? $meta['_id'] : '';
+                            $type        = ! empty( $meta['type'] ) ? $meta['type'] : 'system';
                             $day_color   = ! empty( $meta['color'] ) ? $meta['color'] : '';
                             $night_color = isset( $saved_map[ $id ] ) ? $saved_map[ $id ] : '';
+
+                            if ( ! $id ) {
+                                continue;
+                            }
                             ?>
                             <tr>
                                 <td>
                                     <strong><?php echo esc_html( $meta['title'] ); ?></strong>
-                                    <br/><small><?php echo esc_html( $id ); ?></small>
+                                    <br/><small><?php echo esc_html( $id ); ?> · <?php echo esc_html( ucfirst( $type ) ); ?></small>
                                 </td>
                                 <td>
                                     <input type="text" disabled value="<?php echo esc_attr( $day_color ); ?>" class="regular-text" />
@@ -196,6 +208,13 @@ class EDM_Settings {
                 <li><?php esc_html_e( 'This is the MVP settings UI. The CSS override engine and front-end switcher will be added in Step 2.', 'elementor-dark-mapper' ); ?></li>
                 <li><?php esc_html_e( 'TODO: per-page exclusions, editor preview, kit export integration, and smooth transitions (placeholders added in code).', 'elementor-dark-mapper' ); ?></li>
             </ul>
+
+            <?php
+            // TODO: Per-page exclusion
+            // TODO: Editor dark preview
+            // TODO: Kit export integration
+            // TODO: Smooth transitions
+            ?>
         </div>
         <?php
     }

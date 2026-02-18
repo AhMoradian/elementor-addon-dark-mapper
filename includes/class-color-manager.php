@@ -13,14 +13,20 @@ class EDM_Color_Manager {
     /**
      * Return array of global colors from the active kit.
      *
-     * Returns an associative array keyed by color _id:
+     * Returns a unified list with Elementor system + custom colors:
      * [
-     *   'primary' => [
-     *       'id'    => 'primary',
-     *       'title' => 'Primary',
-     *       'color' => '#2a2a2a',
+     *   [
+     *      '_id'   => 'primary',
+     *      'title' => 'Primary',
+     *      'color' => '#2a2a2a',
+     *      'type'  => 'system',
      *   ],
-     *   ...
+     *   [
+     *      '_id'   => 'abc123',
+     *      'title' => 'Brand Blue',
+     *      'color' => '#0055ff',
+     *      'type'  => 'custom',
+     *   ],
      * ]
      *
      * @return array
@@ -47,11 +53,22 @@ class EDM_Color_Manager {
             return $colors;
         }
 
+        // Null-safe reads from Elementor Free kit settings.
         $system_colors = $kit->get_settings( 'system_colors' );
+        $custom_colors = $kit->get_settings( 'custom_colors' );
 
-        // system_colors might be an array of arrays
-        if ( is_array( $system_colors ) ) {
-            foreach ( $system_colors as $item ) {
+        // Keep behavior resilient: fallback to empty arrays when missing/invalid.
+        $system_colors = is_array( $system_colors ) ? $system_colors : array();
+        $custom_colors = is_array( $custom_colors ) ? $custom_colors : array();
+
+        // Process both sources using one format for future extensibility.
+        $all_sources = array(
+            'system' => $system_colors,
+            'custom' => $custom_colors,
+        );
+
+        foreach ( $all_sources as $type => $source_colors ) {
+            foreach ( $source_colors as $item ) {
                 // Expect at least: _id, title, color
                 if ( ! is_array( $item ) ) {
                     continue;
@@ -62,14 +79,20 @@ class EDM_Color_Manager {
                 $color = isset( $item['color'] ) ? $this->normalize_color( $item['color'] ) : '';
 
                 if ( $id ) {
-                    $colors[ $id ] = array(
-                        'id'    => $id,
+                    $colors[] = array(
+                        '_id'   => $id,
                         'title' => $title,
                         'color' => $color,
+                        'type'  => $type,
                     );
                 }
             }
         }
+
+        // TODO: Per-page exclusion
+        // TODO: Editor dark preview
+        // TODO: Kit export integration
+        // TODO: Smooth transitions
 
         return $colors;
     }
