@@ -1,0 +1,21 @@
+/**
+ * EDM Frontend CSS
+ * Lightweight placeholder. Actual color variable overrides are injected inline
+ * by `wp_add_inline_style()` as generated CSS (body.edm-dark { --e-global-color-... }).
+ *
+ * Keep this file minimal to stay lightweight.
+ */
+
+/* Body class used by the plugin when dark mode is active */
+body.edm-dark {
+    /* variables will be injected here via inline CSS */
+}
+
+/* Optional helper class: if you want smooth transitions later,
+   add it to <body> or elements. The transition system will be
+   implemented as a future feature. */
+.edm-smooth-transition {
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* TODO: Add more UI helpers here (per-page exclusions, preview styles, etc.) - placeholders only */
