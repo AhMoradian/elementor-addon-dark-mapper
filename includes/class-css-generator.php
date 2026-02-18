@@ -94,8 +94,11 @@ class EDM_CSS_Generator {
         // Fallback — ensure our plugin front-end CSS is registered, then attach inline to it.
         $handle = 'edm-frontend-styles';
         if ( ! wp_style_is( $handle, 'registered' ) ) {
-            $src = EDM_PLUGIN_URL . 'assets/css/frontend.css';
-            wp_register_style( $handle, $src, array(), filemtime( EDM_PLUGIN_DIR . 'assets/css/frontend.css' ) );
+            $src        = EDM_PLUGIN_URL . 'assets/css/frontend.css';
+            $style_path = EDM_PLUGIN_DIR . 'assets/css/frontend.css';
+            $version    = file_exists( $style_path ) ? filemtime( $style_path ) : null;
+
+            wp_register_style( $handle, $src, array(), $version );
             // do not automatically enqueue here; but adding inline requires it to be registered.
         }
 
